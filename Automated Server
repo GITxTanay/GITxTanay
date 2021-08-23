@@ -1,0 +1,203 @@
+from selenium import webdriver 
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.options import Options
+from time import sleep 
+from getpass import getpass  
+
+usr=input('Enter Email-id= ')
+pwd=getpass('Enter password= ')
+name=input('Enter name you want to search= ')
+instruct=input("Select requirement\n(i)Send Friend Request.\n(ii)Collect Basic Info.\n(iii)Send Message.\n(iv)Both 2&3.\n")
+def basic_info():
+    option = Options()
+    option.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 1})
+    driver = webdriver.Chrome(options=option,executable_path=r'D:\Projects\chromedriver.exe')
+    driver.get('https://www.facebook.com')
+    sleep(1) 
+    username_box = driver.find_element_by_id('email') 
+    username_box.send_keys(usr) 
+    sleep(1)   
+    password_box = driver.find_element_by_id('pass') 
+    password_box.send_keys(pwd)
+    sleep(1)
+    login_box = driver.find_element_by_xpath("//*[text()='Log In']")
+    login_box.click()
+    Keys.RETURN
+    print ("Done\n\n") 
+    sleep(2)
+    search=driver.find_element_by_class_name('ijkhr0an pnx7fd3z sgqwj88q hzruof5a pmk7jnqg rnx8an3s fcg2cn6m')
+    sleep(1)
+    search.send_keys(name)
+    c=driver.get('https://www.facebook.com/search/people/?q=%s'%name)
+    sleep(2)
+    search_list1=list(driver.find_element_by_class_name("dhix69tm sjgh65i0 wkznzc2l tr9rh885"))
+    #print(search_list1)
+    username = search_list1[0].get_attribute('innerHTML')
+    fb_id_str=username[username.find("data-profileid=\"")+16:]
+    fb_id=fb_id_str[:fb_id_str.find("\"")]
+    sleep(2)
+    search_list=list(driver.find_elements_by_class_name("_32mo"))
+    word=search_list[0]
+    c=search_list[0].click()
+    sleep(3)
+    p=driver.find_element_by_link_text("About").click()
+    sleep(3)
+    b=driver.find_element_by_link_text("Contact and basic info").click()
+    sleep(2)
+    basicinfo=driver.find_element_by_id('pagelet_basic').text
+    print(basicinfo)
+    sleep(2)
+    profile_url=username[username.find("href=")+6:username.find("?ref=br_rs")]
+    if basicinfo.find("Birthday")>=0 :
+        birthday=basicinfo[basicinfo.find("Birthday")+8:basicinfo.find("Gender")]
+    else:
+        birthday="Not Found"
+    if basicinfo.find("Gender")>=0 :
+        gender=basicinfo[basicinfo.find("Gender")+6:len(basicinfo)]
+    else:
+        gender="Not Found"
+    data = {}
+    data['birthday'] = birthday
+    data['gender'] = gender
+    data['fbid'] = fb_id
+    data['profile_url'] = profile_url
+    #print(data)
+    print('\nFb_id={0}'.format(fb_id))
+    print('Profile_url={0}'.format(profile_url))
+    driver.quit()
+
+def message():
+    option = Options()
+    option.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 1})
+    driver = webdriver.Chrome(options=option,executable_path=r'D:\Projects\chromedriver.exe')
+    driver.get('https://www.facebook.com') 
+    sleep(1) 
+    username_box = driver.find_element_by_id('email') 
+    username_box.send_keys(usr)  
+    sleep(1)   
+    password_box = driver.find_element_by_id('pass') 
+    password_box.send_keys(pwd)
+    sleep(1)
+    login_box = driver.find_element_by_id('loginbutton') 
+    login_box.click() 
+    sleep(2)
+    search=driver.find_element_by_name('q')
+    sleep(1)
+    search.send_keys(name)
+    c=driver.get('https://www.facebook.com/search/people/?q=%s'%name)
+    sleep(2)
+    search_list1=list(driver.find_elements_by_class_name("_401d"))
+    username = search_list1[0].get_attribute('innerHTML')
+    #print(username)
+    fb_url_str=username[username.find("www.facebook.com/")+17:]
+    fb_url=fb_url_str[:fb_url_str.find("?")]
+    fb_id_str=username[username.find("data-profileid=\"")+16:]
+    #fb_id=fb_id_str[:fb_id_str.find("\"")]
+    print('\nFb_URL=',fb_url)
+    sleep(2)
+    driver.get("https://www.facebook.com/messages/t/"+fb_url)
+    mess = driver.find_element_by_xpath("//div[contains(@class,'_5rpu') and @role='combobox']")
+    mess.send_keys(text+Keys.RETURN)
+    sleep(5)
+    driver.quit()
+def fb_req():
+    option=Options()
+    option.add_experimental_option('prefs',{'profile.default_content_setting_values.notifications':1})
+    driver = webdriver.Chrome(options=option,executable_path=r'D:\Projects\chromedriver.exe')
+    driver.get('https://www.facebook.com')
+    email=driver.find_element_by_id("email")
+    email.send_keys(usr)
+    sleep(1)
+    passw=driver.find_element_by_id("pass")
+    passw.send_keys(pwd)
+    sleep(1)
+    login=driver.find_element_by_id("loginbutton")
+    login.click()
+    sleep(2)
+    search=driver.find_element_by_name('q')
+    sleep(2)
+    search.send_keys(name)
+    driver.get('https://www.facebook.com/search/people/?q=%s'%name)
+    sleep(1)
+    search_list=list(driver.find_elements_by_class_name("_32mo"))
+    sleep(2)
+    search_list[0].click()
+    sleep(2)
+    req=driver.find_element_by_id("u_ps_fetchstream_1_0_2")
+    sleep(2)
+    req.click()
+    sleep(2)
+    print('\nFriend Request Sent')
+    driver.quit()
+    #print("\n\nFriend Request Already Sent")
+if instruct=='i'or instruct=='1':
+    fb_req()
+elif instruct=='ii'or instruct=='2':
+    basic_info()
+elif instruct=='iii'or instruct=='3':
+    text=input("Enter message\n")
+    message()
+elif instruct=='iv'or instruct=='4':
+    text=input("Enter message\n")
+    option = Options()
+    option.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 1})
+    driver = webdriver.Chrome(options=option, executable_path=r'D:\Projects\chromedriver.exe')
+    driver.get('https://www.facebook.com')
+    sleep(1) 
+    username_box = driver.find_element_by_id('email') 
+    username_box.send_keys(usr)
+    sleep(1)   
+    password_box = driver.find_element_by_id('pass') 
+    password_box.send_keys(pwd) 
+    login_box = driver.find_element_by_id('loginbutton') 
+    login_box.click()
+    print ("Done\n\n") 
+    sleep(2)
+    search=driver.find_element_by_name('q')
+    sleep(1)
+    search.send_keys(name)
+    c=driver.get('https://www.facebook.com/search/people/?q=%s'%name)
+    sleep(2)
+    search_list1=list(driver.find_elements_by_class_name("_401d"))
+    username = search_list1[0].get_attribute('innerHTML')
+    fb_id_str=username[username.find("data-profileid=\"")+16:]
+    fb_id=fb_id_str[:fb_id_str.find("\"")]
+    fb_url_str=username[username.find("www.facebook.com/")+17:]
+    fb_url=fb_url_str[:fb_url_str.find("?")]
+    sleep(2)
+    search_list=list(driver.find_elements_by_class_name("_32mo"))
+    word=search_list[0]
+    c=search_list[0].click()
+    sleep(3)
+    p=driver.find_element_by_link_text("About").click()
+    sleep(3)
+    b=driver.find_element_by_link_text("Contact and basic info").click()
+    sleep(2)
+    basicinfo=driver.find_element_by_id('pagelet_basic').text
+    print(basicinfo)
+    sleep(2)
+    profile_url=username[username.find("href=")+6:username.find("?ref=br_rs")]
+    if basicinfo.find("Birthday")>=0 :
+        birthday=basicinfo[basicinfo.find("Birthday")+8:basicinfo.find("Gender")]
+    else:
+        birthday="Not Found"
+    if basicinfo.find("Gender")>=0 :
+        gender=basicinfo[basicinfo.find("Gender")+6:len(basicinfo)]
+    else:
+        gender="Not Found"
+    data = {}
+    data['birthday'] = birthday
+    data['gender'] = gender
+    data['fbid'] = fb_id
+    data['profile_url'] = profile_url
+    #print(data)
+    print('\nFb_id={0}'.format(fb_id))
+    print('Profile_url={0}'.format(profile_url))
+    sleep(2)
+    driver.get("https://www.facebook.com/messages/t/"+fb_url)
+    mess = driver.find_element_by_xpath("//div[contains(@class,'_5rpu') and @role='combobox']")
+    mess.send_keys(text+Keys.RETURN)
+    sleep(3)
+    driver.quit()
+else:
+    print('Invalid Instruction')

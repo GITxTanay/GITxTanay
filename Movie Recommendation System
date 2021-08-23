@@ -1,0 +1,20 @@
+import numpy as np
+import pandas as pd
+df=pd.read_csv(r'D:\Tools\Anaconda3 (64-bit)\ml-latest-small\ml-latest-small\movies.csv')
+pf=pd.read_csv(r'D:\Tools\Anaconda3 (64-bit)\ml-latest-small\ml-latest-small\ratings.csv')
+data=pd.merge(df,pf,on='movieId')
+data.groupby('title')['rating'].mean()
+rating=data.groupby('title')['rating'].count()
+rs=pd.DataFrame(data.groupby('title')['rating'].mean())    
+rs['num of ratings'] = pd.DataFrame(data.groupby('title')['rating'].count())
+movie_rating=data.pivot_table(index ='userId',columns ='title',values ='rating')
+movie=movie_rating['eXistenZ (1999)']
+movie_corr=movie_rating.corrwith(movie)
+movie_corr=pd.DataFrame(movie_corr,columns=['Correlation'])
+movie_corr.dropna(inplace=True)
+movie_corr_rating=movie_corr.join(rating)
+ratings1=movie_corr_rating[movie_corr_rating['rating']>200]
+corr1=movie_corr_rating[movie_corr_rating['Correlation']==1]
+corr_movies=corr1[corr1['rating']>30]
+corr2=ratings1[ratings1['Correlation']>0.4]
+recommendation=corr_movies.append(corr2)
